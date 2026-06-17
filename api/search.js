@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { Pool } from '@neondatabase/serverless';
 
 export default async function handler(req, res) {
   const { cccd, hoten, ngaysinh } = req.query;
@@ -8,8 +8,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Vercel sẽ tự động lấy POSTGRES_URL từ phần cài đặt biến môi trường trên web
-    const sql = neon(process.env.POSTGRES_URL);
+    // Sử dụng công cụ Pool chuẩn của Neon để thay thế cho hàm sql cũ
+    const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
 
     let query = 'SELECT * FROM ChungChi WHERE 1=1';
     let values = [];
@@ -31,10 +31,12 @@ export default async function handler(req, res) {
       count++;
     }
 
-    const result = await sql(query, values);
+    // Thực thi truy vấn bằng Pool
+    const result = await pool.query(query, values);
 
-    if (result.length > 0) {
-      return res.status(200).json({ success: true, data: result });
+    // Dữ liệu trả về của Pool nằm ở biến rows
+    if (result.rows.length > 0) {
+      return res.status(200).json({ success: true, data: result.rows });
     } else {
       return res.status(404).json({ success: false, message: "Không tìm thấy dữ liệu văn bằng/chứng chỉ!" });
     }
