@@ -36,23 +36,27 @@ export class AppComponent {
   }
 
   onSearch() {
+    // Reset lỗi mỗi lần bấm tra cứu
     this.errorMessage = '';
     
-    // Validate Front-end
+    // Validate Front-end (Kiểm tra người dùng đã nhập chưa)
     if (!this.searchQuery.cccd && !(this.searchQuery.hoten && this.searchQuery.ngaysinh)) {
       this.errorMessage = 'Nhập số CCCD, hoặc nhập đủ họ tên và ngày sinh.';
       return;
     }
 
+    // Bật hiệu ứng xoay, đưa màn hình về trạng thái chờ
     this.isLoading = true;
     this.searchState = 'idle';
     this.result = null;
 
+    // Đóng gói dữ liệu gửi đi
     const params = new URLSearchParams();
     if (this.searchQuery.cccd) params.append('cccd', this.searchQuery.cccd);
     if (this.searchQuery.hoten) params.append('hoten', this.searchQuery.hoten);
     if (this.searchQuery.ngaysinh) params.append('ngaysinh', this.searchQuery.ngaysinh);
 
+    // Gọi API sang backend
     this.http.get<any>(`/api/search?${params.toString()}`).subscribe({
       next: (res) => {
         // Lấy kết quả đầu tiên trả về từ mảng PostgreSQL
@@ -61,15 +65,19 @@ export class AppComponent {
           this.searchState = 'found';
         } else {
           this.searchState = 'notfound';
+          this.errorMessage = 'Thông tin không hợp lệ hoặc không có trong dữ liệu.';
         }
-        this.isLoading = false;
+        this.isLoading = false; // Tắt vòng xoay
       },
       error: (err) => {
+        // Đón lỗi 404 từ backend trả về
         this.searchState = 'notfound';
-        if (err.status !== 404) {
+        if (err.status === 404) {
+          this.errorMessage = 'Thông tin không hợp lệ hoặc không có trong dữ liệu.';
+        } else {
           this.errorMessage = err.error?.message || 'Lỗi hệ thống hoặc mất kết nối!';
         }
-        this.isLoading = false;
+        this.isLoading = false; // Bắt buộc tắt vòng xoay
       }
     });
   }
