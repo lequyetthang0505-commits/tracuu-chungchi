@@ -8,33 +8,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Sử dụng công cụ Pool chuẩn của Neon để thay thế cho hàm sql cũ
     const pool = new Pool({ connectionString: process.env.POSTGRES_URL });
 
-    let query = 'SELECT * FROM ChungChi WHERE 1=1';
+    // 1. Tên bảng viết thường: chungchi
+    let query = 'SELECT * FROM chungchi WHERE 1=1';
     let values = [];
     let count = 1;
 
+    // 2. Tên cột viết thường
     if (cccd) {
-      query += ` AND "CCCD" = $${count}`;
+      query += ` AND cccd = $${count}`;
       values.push(cccd);
       count++;
     }
     if (hoten) {
-      query += ` AND "HoTen" ILIKE $${count}`; 
+      query += ` AND hoten ILIKE $${count}`; 
       values.push(`%${hoten}%`);
       count++;
     }
     if (ngaysinh) {
-      query += ` AND "NgaySinh" = $${count}`;
+      // 3. Ép kiểu ::date để so sánh ngày chuẩn xác với TIMESTAMP của Neon
+      query += ` AND ngaysinh::date = $${count}::date`;
       values.push(ngaysinh);
       count++;
     }
 
-    // Thực thi truy vấn bằng Pool
     const result = await pool.query(query, values);
 
-    // Dữ liệu trả về của Pool nằm ở biến rows
     if (result.rows.length > 0) {
       return res.status(200).json({ success: true, data: result.rows });
     } else {
