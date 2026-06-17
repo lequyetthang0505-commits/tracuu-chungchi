@@ -1,0 +1,128 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <svg class="emblem" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" stroke="#d4a017" stroke-width="1.5" opacity="0.8"/>
+      <circle cx="32" cy="32" r="24" stroke="#d4a017" stroke-width="1.5" opacity="0.5"/>
+      <path d="M32 16l4.94 9.95 10.98 1.6-7.94 7.74 1.87 10.93L32 41.1l-9.85 5.12 1.87-10.93-7.94-7.74 10.98-1.6L32 16z" fill="#d4a017" opacity="0.95"/>
+    </svg>
+    <div class="header-text">
+      <p class="header-text__eyebrow">Cổng thông tin trực tuyến</p>
+      <h1 class="header-text__title">Hệ thống Tra cứu Chứng chỉ</h1>
+      <p class="header-text__sub">Tra cứu, xác thực thông tin chứng chỉ đã cấp</p>
+    </div>
+  </div>
+</header>
+<div class="flag-stripe"></div>
+
+<main class="page">
+  <section class="panel search-panel">
+    <h2 class="search-panel__title">Tra cứu thông tin chứng chỉ</h2>
+    <p class="search-panel__hint">Vui lòng nhập số CCCD hoặc họ tên kèm ngày sinh để tra cứu.</p>
+
+    <form (ngSubmit)="onSearch()" novalidate>
+      <div class="field-grid">
+        <div class="field">
+          <label>Số CCCD / CMND <span class="req">*</span></label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="1.8"/><path d="M5.5 16c.6-1.6 1.9-2.4 3-2.4s2.4.8 3 2.4"/><path d="M14 9.5h6M14 13h6"/></svg>
+            <input type="text" [(ngModel)]="searchQuery.cccd" name="cccd" inputmode="numeric" maxlength="12" placeholder="Nhập 12 số CCCD">
+          </div>
+          <span class="field-error">{{ errorMessage }}</span> 
+        </div>
+
+        <div class="field">
+          <label>Họ và tên</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>
+            <input type="text" [(ngModel)]="searchQuery.hoten" name="hoten" placeholder="VD: Nguyễn Văn A" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="field field--full">
+          <label>Ngày sinh</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4M16 3v4"/></svg>
+            <input type="date" [(ngModel)]="searchQuery.ngaysinh" name="ngaysinh">
+          </div>
+        </div>
+      </div>
+
+      <div class="search-actions">
+        <span class="form-note">Thông tin được đối chiếu với dữ liệu đã lưu trữ trên Hệ thống.</span>
+        <button class="btn-search" type="submit" [disabled]="isLoading" [class.is-loading]="isLoading">
+          <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <span class="spinner"></span>
+          <span class="btn-search__label">{{ isLoading ? 'Đang tra cứu...' : 'Tra cứu' }}</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel result-panel">
+    <div class="result-frame">
+
+      <div *ngIf="searchState === 'idle'" class="state-idle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        <p class="state-idle__title">Chưa có kết quả tra cứu</p>
+        <p class="state-idle__text">Nhập thông tin ở trên và nhấn “Tra cứu” để xem chi tiết chứng chỉ.</p>
+      </div>
+
+      <div *ngIf="searchState === 'notfound'" class="state-notfound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+        <p class="state-notfound__title">Không tìm thấy chứng chỉ phù hợp</p>
+        <p class="state-notfound__text">Vui lòng kiểm tra lại thông tin bạn đã nhập, hoặc dữ liệu hiện chưa được cập nhật trên hệ thống.</p>
+      </div>
+
+      <div *ngIf="searchState === 'found'" class="state-found">
+        <div class="result-head">
+          <div>
+            <p class="result-head__title">Thông tin chứng chỉ</p>
+            <p class="result-head__id">Mã hồ sơ: <b>{{ result?.Id || '—' }}</b></p>
+          </div>
+          <svg class="stamp" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#c8102e" stroke-width="2"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#c8102e" stroke-width="1.2"/>
+            <path d="M36 51l9 9 19-21" fill="none" stroke="#c8102e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="50" y="22" fill="#c8102e" font-size="7.4" font-weight="700" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif">ĐÃ XÁC THỰC</text>
+            <text x="50" y="84" fill="#c8102e" font-size="6.4" font-weight="600" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif">HỆ THỐNG TRA CỨU</text>
+          </svg>
+        </div>
+
+        <p class="group-label">Thông tin cá nhân</p>
+        <dl class="data-grid">
+          <div class="data-item"><dt>Họ và tên</dt><dd [class.empty]="!result?.HoTen">{{ result?.HoTen || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Ngày sinh</dt><dd [class.empty]="!result?.NgaySinh">{{ formatDate(result?.NgaySinh) || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Giới tính</dt><dd [class.empty]="!result?.GioiTinh">{{ result?.GioiTinh || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Dân tộc</dt><dd [class.empty]="!result?.DanToc">{{ result?.DanToc || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Số CCCD/CMND</dt><dd class="mono" [class.empty]="!result?.CCCD">{{ result?.CCCD || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Nơi sinh</dt><dd [class.empty]="!result?.NoiSinh">{{ result?.NoiSinh || 'Không có' }}</dd></div>
+        </dl>
+
+        <p class="group-label">Thông tin chứng chỉ</p>
+        <dl class="data-grid">
+          <div class="data-item"><dt>Số hiệu chứng chỉ</dt><dd class="mono" [class.empty]="!result?.SoHieuCC">{{ result?.SoHieuCC || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Số vào sổ gốc</dt><dd class="mono" [class.empty]="!result?.SoVaoSo">{{ result?.SoVaoSo || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Ngày cấp</dt><dd [class.empty]="!result?.NgayCap">{{ formatDate(result?.NgayCap) || 'Không có' }}</dd></div>
+          <div class="data-item"><dt>Đợt thi</dt><dd [class.empty]="!result?.DotThi">{{ result?.DotThi || 'Không có' }}</dd></div>
+          <div class="data-item--full">
+            <div class="score-pair">
+              <div class="score-chip"><dt>Điểm lý thuyết</dt><dd [class.empty]="!result?.DLT">{{ result?.DLT || '—' }}</dd></div>
+              <div class="score-chip"><dt>Điểm thực hành</dt><dd [class.empty]="!result?.DTH">{{ result?.DTH || '—' }}</dd></div>
+            </div>
+          </div>
+          <div class="data-item--full"><dt>Ghi chú</dt><dd [class.empty]="!result?.GhiChu">{{ result?.GhiChu || 'Không có' }}</dd></div>
+        </dl>
+
+        <span class="verified-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          Dữ liệu khớp với hệ thống lưu trữ
+        </span>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  © 2026 Hệ thống Tra cứu Chứng chỉ — Dữ liệu chỉ phục vụ mục đích tra cứu, tham khảo.
+</footer>
