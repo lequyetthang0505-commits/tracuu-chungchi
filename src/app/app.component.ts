@@ -81,4 +81,17 @@ export class AppComponent {
       }
     });
   }
+
+  // Hàm làm mới để tiếp tục tra cứu người khác
+  onReset() {
+    // 1. Xóa sạch dữ liệu trong các ô nhập
+    this.searchQuery = { cccd: '', hoten: '', ngaysinh: '' };
+    
+    // 2. Xóa thông báo lỗi (nếu có)
+    this.errorMessage = '';
+    
+    // 3. Ẩn bảng kết quả, đưa giao diện về trạng thái chờ ban đầu
+    this.searchState = 'idle';
+    this.result = null;
+  }
 }

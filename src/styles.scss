@@ -1,9 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap');
 
@@ -120,6 +117,37 @@ body::before {
 .btn-search .spinner { display: none; }
 .btn-search.is-loading .spinner { display: inline-flex; }
 
+/* Nút Làm mới / Tiếp tục tra cứu */
+.btn-reset {
+  appearance: none; 
+  border: 1px solid var(--border); 
+  cursor: pointer; 
+  background: #fff; 
+  color: var(--text-600); 
+  font-family: inherit;
+  font-size: 14.5px; 
+  font-weight: 600; 
+  letter-spacing: 0.02em; 
+  padding: 10px 20px; 
+  border-radius: 7px;
+  display: inline-flex; 
+  align-items: center; 
+  transition: background .15s, color .15s, transform .05s; 
+  flex: none;
+}
+.btn-reset:hover { 
+  background: var(--blue-100); 
+  color: var(--navy-900); 
+  border-color: var(--blue-600);
+}
+.btn-reset:active { 
+  transform: translateY(1px); 
+}
+.btn-reset:focus-visible { 
+  outline: 3px solid var(--blue-100); 
+  outline-offset: 2px; 
+}
+
 .spinner {
   width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
   border-top-color: #fff; animation: spin .7s linear infinite;
@@ -191,8 +219,9 @@ body::before {
   .field-grid { grid-template-columns: 1fr; }
   .data-grid { grid-template-columns: 1fr; }
   .score-pair { flex-direction: column; gap: 10px; }
-  .search-actions { flex-direction: column; align-items: stretch; }
-  .btn-search { justify-content: center; }
+  .search-actions { flex-direction: column; align-items: stretch; gap: 16px; }
+  .search-actions > div { flex-direction: column; width: 100%; }
+  .btn-search, .btn-reset { width: 100%; justify-content: center; }
   .result-head { flex-direction: column; }
   .stamp { align-self: flex-end; }
 }
